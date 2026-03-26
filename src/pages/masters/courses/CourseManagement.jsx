@@ -12,6 +12,7 @@ import ConfirmDialog from '../../../components/common/ConfirmDialog';
 import StatusChip from '../../../components/common/StatusChip';
 import storageService from '../../../services/storageService';
 import useSearch from '../../../hooks/useSearch';
+import { ENQUIRY_TYPES, ACADEMIC_YEARS } from '../../../data/constants';
 
 const STORAGE_KEY = 'programs';
 
@@ -48,19 +49,20 @@ export default function CourseManagement() {
   );
 
   const searchFields = [
-    { name: 'name', label: 'Course Name', type: 'text', gridSize: 3 },
+    { name: 'name', label: 'Name', type: 'text', gridSize: 3 },
+    { name: 'code', label: 'Program Short Code', type: 'text', gridSize: 2 },
     {
-      name: 'school',
-      label: 'School',
+      name: 'enquiryType',
+      label: 'Enquiry Type Restriction',
       type: 'select',
-      options: schoolOptions,
+      options: ENQUIRY_TYPES,
       gridSize: 3,
     },
     {
-      name: 'type',
-      label: 'Type',
+      name: 'year',
+      label: 'Year',
       type: 'select',
-      options: courseTypes,
+      options: ACADEMIC_YEARS,
       gridSize: 2,
     },
     {

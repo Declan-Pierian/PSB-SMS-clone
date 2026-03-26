@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
-  Box, Paper, Typography, TextField, Button, MenuItem, Card, CardContent,
+  Box, Paper, Typography, TextField, Button, MenuItem,
   IconButton, Tooltip, Divider, Alert,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import SearchIcon from '@mui/icons-material/Search';
 import PaymentIcon from '@mui/icons-material/Payment';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import DiscountIcon from '@mui/icons-material/LocalOffer';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useSnackbar } from 'notistack';
 import { v4 as uuidv4 } from 'uuid';
 import PageHeader from '../../components/common/PageHeader';
@@ -27,6 +28,10 @@ export default function PaymentConsole() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [customCreditAmount, setCustomCreditAmount] = useState('');
+  const [receiptSeries, setReceiptSeries] = useState('RCP');
+  const [discountDialogOpen, setDiscountDialogOpen] = useState(false);
+  const [adjustCreditsDialogOpen, setAdjustCreditsDialogOpen] = useState(false);
 
   const handleSearch = useCallback(() => {
     if (!searchTerm.trim()) {
@@ -76,7 +81,7 @@ export default function PaymentConsole() {
 
       const payment = {
         id: uuidv4(),
-        receiptNo: `RCP-${Date.now().toString().slice(-8)}`,
+        receiptNo: `${receiptSeries}-${Date.now().toString().slice(-8)}`,
         invoiceId: selectedInvoice.id,
         invoiceNo: selectedInvoice.invoiceNo,
         studentId: selectedStudent.id,
@@ -117,13 +122,112 @@ export default function PaymentConsole() {
         variant: 'success',
       });
     },
-    [selectedInvoice, selectedStudent, enqueueSnackbar]
+    [selectedInvoice, selectedStudent, receiptSeries, enqueueSnackbar]
   );
 
   const handleViewPayment = useCallback((payment) => {
     setSelectedPayment(payment);
     setDetailDialogOpen(true);
   }, []);
+
+  const handleApplyDiscount = useCallback(
+    (values) => {
+      if (!selectedInvoice) {
+        enqueueSnackbar('Please select an invoice first', { variant: 'warning' });
+        return;
+      }
+      const discountAmount = parseFloat(values.discountAmount);
+      if (isNaN(discountAmount) || discountAmount <= 0) {
+        enqueueSnackbar('Please enter a valid discount amount', { variant: 'error' });
+        return;
+      }
+      const balance = (selectedInvoice.amount || 0) - (selectedInvoice.paidAmount || 0);
+      if (discountAmount > balance) {
+        enqueueSnackbar(`Discount cannot exceed outstanding balance of $${balance.toFixed(2)}`, { variant: 'error' });
+        return;
+      }
+      const newPaidAmount = (selectedInvoice.paidAmount || 0) + discountAmount;
+      const newBalance = (selectedInvoice.amount || 0) - newPaidAmount;
+      const newStatus = newBalance <= 0 ? 'Paid' : 'Partially Paid';
+      storageService.update('invoices', selectedInvoice.id, {
+        paidAmount: newPaidAmount,
+        balance: newBalance,
+        status: newStatus,
+        lastDiscount: {
+          type: values.discountType,
+          amount: discountAmount,
+          appliedAt: new Date().toISOString(),
+        },
+      });
+      setOutstandingInvoices((prev) =>
+        prev
+          .map((inv) =>
+            inv.id === selectedInvoice.id
+              ? { ...inv, paidAmount: newPaidAmount, balance: newBalance, status: newStatus }
+              : inv
+          )
+          .filter((inv) => inv.status !== 'Paid')
+      );
+      setDiscountDialogOpen(false);
+      setSelectedInvoice(null);
+      enqueueSnackbar(
+        `${values.discountType} discount of $${discountAmount.toFixed(2)} applied to ${selectedInvoice.invoiceNo}`,
+        { variant: 'success' }
+      );
+    },
+    [selectedInvoice, enqueueSnackbar]
+  );
+
+  const handleAdjustCredits = useCallback(
+    (values) => {
+      if (!selectedStudent) {
+        enqueueSnackbar('Please search for a student first', { variant: 'warning' });
+        return;
+      }
+      const creditAmount = parseFloat(values.creditAmount);
+      if (isNaN(creditAmount) || creditAmount === 0) {
+        enqueueSnackbar('Please enter a valid credit amount', { variant: 'error' });
+        return;
+      }
+      if (!values.reason?.trim()) {
+        enqueueSnackbar('Please provide a reason for the credit adjustment', { variant: 'error' });
+        return;
+      }
+      const creditEntry = {
+        id: uuidv4(),
+        studentId: selectedStudent.id,
+        studentName: selectedStudent.name || `${selectedStudent.firstName} ${selectedStudent.lastName}`,
+        amount: creditAmount,
+        reason: values.reason,
+        createdAt: new Date().toISOString(),
+        adjustedBy: 'Current User',
+      };
+      storageService.create('creditAdjustments', creditEntry);
+      const currentCredits = parseFloat(customCreditAmount) || 0;
+      setCustomCreditAmount(String(currentCredits + creditAmount));
+      setAdjustCreditsDialogOpen(false);
+      enqueueSnackbar(
+        `Credit adjustment of $${creditAmount.toFixed(2)} recorded for ${creditEntry.studentName}`,
+        { variant: 'success' }
+      );
+    },
+    [selectedStudent, customCreditAmount, enqueueSnackbar]
+  );
+
+  const handleOpenDiscount = useCallback((invoice) => {
+    setSelectedInvoice(invoice);
+    setDiscountDialogOpen(true);
+  }, []);
+
+  const receiptSeriesOptions = useMemo(
+    () => [
+      { value: 'RCP', label: 'RCP - Standard Receipt' },
+      { value: 'OFR', label: 'OFR - Official Receipt' },
+      { value: 'PRV', label: 'PRV - Provisional Receipt' },
+      { value: 'AGT', label: 'AGT - Agent Receipt' },
+    ],
+    []
+  );
 
   const invoiceColumns = useMemo(
     () => [
@@ -164,25 +268,39 @@ export default function PaymentConsole() {
       {
         field: 'actions',
         headerName: 'Actions',
-        width: 120,
+        width: 200,
         sortable: false,
         renderCell: (params) => (
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<PaymentIcon />}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRecordPayment(params.row);
-            }}
-            sx={{ backgroundColor: '#b30537', '&:hover': { backgroundColor: '#800025' }, fontSize: '0.72rem' }}
-          >
-            Pay
-          </Button>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<PaymentIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRecordPayment(params.row);
+              }}
+              sx={{ backgroundColor: '#b30537', '&:hover': { backgroundColor: '#800025' }, fontSize: '0.72rem' }}
+            >
+              Pay
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<DiscountIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenDiscount(params.row);
+              }}
+              sx={{ borderColor: '#b30537', color: '#b30537', '&:hover': { borderColor: '#800025', backgroundColor: 'rgba(179,5,55,0.04)' }, fontSize: '0.72rem' }}
+            >
+              Discount
+            </Button>
+          </Box>
         ),
       },
     ],
-    [handleRecordPayment]
+    [handleRecordPayment, handleOpenDiscount]
   );
 
   const paymentColumns = useMemo(
@@ -268,7 +386,7 @@ export default function PaymentConsole() {
           Search Student
         </Typography>
         <Grid container spacing={2} alignItems="flex-end">
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
               fullWidth
               size="small"
@@ -277,6 +395,33 @@ export default function PaymentConsole() {
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              fullWidth
+              size="small"
+              type="number"
+              label="Custom Credit Amount ($)"
+              value={customCreditAmount}
+              onChange={(e) => setCustomCreditAmount(e.target.value)}
+              slotProps={{ htmlInput: { min: 0, step: '0.01' } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              select
+              fullWidth
+              size="small"
+              label="Receipt Series"
+              value={receiptSeries}
+              onChange={(e) => setReceiptSeries(e.target.value)}
+            >
+              {receiptSeriesOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 'auto' }}>
             <Button
@@ -323,6 +468,58 @@ export default function PaymentConsole() {
                 </Box>
               </Grid>
             </Grid>
+          </Paper>
+
+          <Paper sx={{ p: 2, mb: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
+              Payment Actions
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+              <Button
+                variant="contained"
+                startIcon={<PaymentIcon />}
+                disabled={outstandingInvoices.length === 0}
+                onClick={() => {
+                  if (outstandingInvoices.length > 0) handleRecordPayment(outstandingInvoices[0]);
+                }}
+                sx={{ backgroundColor: '#b30537', '&:hover': { backgroundColor: '#800025' } }}
+              >
+                Proceed to Payment
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DiscountIcon />}
+                disabled={outstandingInvoices.length === 0}
+                onClick={() => {
+                  if (outstandingInvoices.length > 0) handleOpenDiscount(outstandingInvoices[0]);
+                }}
+                sx={{ borderColor: '#b30537', color: '#b30537', '&:hover': { borderColor: '#800025', backgroundColor: 'rgba(179,5,55,0.04)' } }}
+              >
+                Apply Discount
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<AccountBalanceWalletIcon />}
+                onClick={() => setAdjustCreditsDialogOpen(true)}
+                sx={{ borderColor: '#b30537', color: '#b30537', '&:hover': { borderColor: '#800025', backgroundColor: 'rgba(179,5,55,0.04)' } }}
+              >
+                Adjust Credits
+              </Button>
+              <TextField
+                select
+                size="small"
+                label="Receipt Series"
+                value={receiptSeries}
+                onChange={(e) => setReceiptSeries(e.target.value)}
+                sx={{ minWidth: 220 }}
+              >
+                {receiptSeriesOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
           </Paper>
 
           {outstandingInvoices.length > 0 ? (
@@ -405,6 +602,81 @@ export default function PaymentConsole() {
           setDetailDialogOpen(false);
           setSelectedPayment(null);
         }}
+        maxWidth="sm"
+      />
+
+      <FormDialog
+        open={discountDialogOpen}
+        onClose={() => {
+          setDiscountDialogOpen(false);
+          setSelectedInvoice(null);
+        }}
+        onSubmit={handleApplyDiscount}
+        title="Apply Discount"
+        fields={[
+          {
+            name: 'invoiceNo',
+            label: 'Invoice No',
+            disabled: true,
+            defaultValue: selectedInvoice?.invoiceNo || '',
+          },
+          {
+            name: 'balanceDisplay',
+            label: 'Outstanding Balance',
+            disabled: true,
+            defaultValue: selectedInvoice
+              ? `$${((selectedInvoice.amount || 0) - (selectedInvoice.paidAmount || 0)).toFixed(2)}`
+              : '$0.00',
+          },
+          {
+            name: 'discountType',
+            label: 'Discount Type',
+            type: 'select',
+            required: true,
+            options: ['Early Payment Discount', 'Scholarship Discount', 'Sibling Discount', 'Staff Discount', 'Promotional Discount', 'Other'],
+          },
+          { name: 'discountAmount', label: 'Discount Amount ($)', type: 'number', required: true },
+        ]}
+        initialValues={{
+          invoiceNo: selectedInvoice?.invoiceNo || '',
+          balanceDisplay: selectedInvoice
+            ? `$${((selectedInvoice.amount || 0) - (selectedInvoice.paidAmount || 0)).toFixed(2)}`
+            : '$0.00',
+        }}
+        submitLabel="Apply Discount"
+        maxWidth="sm"
+      />
+
+      <FormDialog
+        open={adjustCreditsDialogOpen}
+        onClose={() => setAdjustCreditsDialogOpen(false)}
+        onSubmit={handleAdjustCredits}
+        title="Adjust Credits"
+        fields={[
+          {
+            name: 'studentDisplay',
+            label: 'Student',
+            disabled: true,
+            defaultValue: selectedStudent
+              ? (selectedStudent.name || `${selectedStudent.firstName} ${selectedStudent.lastName}`)
+              : '',
+          },
+          {
+            name: 'currentCredit',
+            label: 'Current Credit Balance ($)',
+            disabled: true,
+            defaultValue: customCreditAmount ? `$${parseFloat(customCreditAmount).toFixed(2)}` : '$0.00',
+          },
+          { name: 'creditAmount', label: 'Credit Amount ($)', type: 'number', required: true },
+          { name: 'reason', label: 'Reason', type: 'textarea', required: true, fullWidth: true },
+        ]}
+        initialValues={{
+          studentDisplay: selectedStudent
+            ? (selectedStudent.name || `${selectedStudent.firstName} ${selectedStudent.lastName}`)
+            : '',
+          currentCredit: customCreditAmount ? `$${parseFloat(customCreditAmount).toFixed(2)}` : '$0.00',
+        }}
+        submitLabel="Adjust Credits"
         maxWidth="sm"
       />
     </Box>

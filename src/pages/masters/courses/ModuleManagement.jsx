@@ -12,6 +12,7 @@ import ConfirmDialog from '../../../components/common/ConfirmDialog';
 import StatusChip from '../../../components/common/StatusChip';
 import storageService from '../../../services/storageService';
 import useSearch from '../../../hooks/useSearch';
+import { ENQUIRY_TYPES, SEMESTER_TAGS, COURSE_TYPES, COURSE_TYPE_2, SORT_BY_OPTIONS } from '../../../data/constants';
 
 const STORAGE_KEY = 'modules';
 
@@ -46,22 +47,16 @@ export default function ModuleManagement() {
   );
 
   const searchFields = [
-    { name: 'name', label: 'Module Name', type: 'text', gridSize: 3 },
-    { name: 'code', label: 'Module Code', type: 'text', gridSize: 2 },
-    {
-      name: 'course',
-      label: 'Course',
-      type: 'select',
-      options: courseOptions,
-      gridSize: 3,
-    },
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      options: ['Active', 'Inactive', 'Draft'],
-      gridSize: 2,
-    },
+    { name: 'name', label: 'Name', type: 'text', gridSize: 3 },
+    { name: 'code', label: 'Course Short Code', type: 'text', gridSize: 2 },
+    { name: 'enquiryType', label: 'Enquiry Type', type: 'select', options: ENQUIRY_TYPES, gridSize: 2 },
+    { name: 'program', label: 'Program', type: 'select', options: courseOptions, gridSize: 3 },
+    { name: 'semesterTag', label: 'Semester Tag', type: 'select', options: SEMESTER_TAGS, gridSize: 2 },
+    { name: 'courseType', label: 'Course Type', type: 'select', options: COURSE_TYPES, gridSize: 2 },
+    { name: 'courseType2', label: 'Course Type 2', type: 'select', options: COURSE_TYPE_2, gridSize: 2 },
+    { name: 'sortBy', label: 'Sort By', type: 'select', options: SORT_BY_OPTIONS, gridSize: 2 },
+    { name: 'status', label: 'Enable Status', type: 'select', options: ['Active', 'Inactive', 'Draft'], gridSize: 2 },
+    { name: 'instructor', label: 'Instructor Name/Code', type: 'text', gridSize: 2 },
   ];
 
   const formFields = [

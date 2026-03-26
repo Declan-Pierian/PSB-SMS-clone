@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
-  Box, Typography, Button, IconButton, Tooltip, Chip,
+  Box, IconButton, Tooltip,
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import PrintIcon from '@mui/icons-material/Print';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useSnackbar } from 'notistack';
@@ -11,10 +12,8 @@ import SearchForm from '../../components/common/SearchForm';
 import DataTable from '../../components/common/DataTable';
 import FormDialog from '../../components/common/FormDialog';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
-import StatusChip from '../../components/common/StatusChip';
 import storageService from '../../services/storageService';
 import useSearch from '../../hooks/useSearch';
-import { INVOICE_STATUSES } from '../../data/constants';
 
 export default function InvoiceSearch() {
   const { enqueueSnackbar } = useSnackbar();
@@ -25,17 +24,9 @@ export default function InvoiceSearch() {
 
   const searchFields = useMemo(
     () => [
-      { name: 'invoiceNo', label: 'Invoice No', gridSize: 3 },
-      { name: 'studentName', label: 'Student Name', gridSize: 3 },
-      {
-        name: 'status',
-        label: 'Status',
-        type: 'select',
-        options: INVOICE_STATUSES,
-        gridSize: 2,
-      },
-      { name: 'fromDate', label: 'From Date', type: 'date', gridSize: 2 },
-      { name: 'toDate', label: 'To Date', type: 'date', gridSize: 2 },
+      { name: 'invoiceNumber', label: 'Invoice Number', gridSize: 4 },
+      { name: 'amount', label: 'Amount', gridSize: 4 },
+      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', gridSize: 4 },
     ],
     []
   );
@@ -43,9 +34,9 @@ export default function InvoiceSearch() {
   const handleSearchFilters = useCallback(
     (values) => {
       const filters = {};
-      if (values.invoiceNo) filters.invoiceNo = values.invoiceNo;
-      if (values.studentName) filters.studentName = values.studentName;
-      if (values.status) filters.status = values.status;
+      if (values.invoiceNumber) filters.invoiceNumber = values.invoiceNumber;
+      if (values.amount) filters.amount = values.amount;
+      if (values.dateOfBirth) filters.dateOfBirth = values.dateOfBirth;
       handleSearch(filters);
     },
     [handleSearch]
@@ -55,17 +46,21 @@ export default function InvoiceSearch() {
     return data;
   }, [data]);
 
-  const handleViewInvoice = useCallback((invoice) => {
-    setSelectedInvoice(invoice);
-    setDetailDialogOpen(true);
-  }, []);
-
   const handleMarkAsPaid = useCallback((invoice) => {
     setConfirmDialog({ open: true, action: 'markPaid', invoice });
   }, []);
 
   const handleCancelInvoice = useCallback((invoice) => {
     setConfirmDialog({ open: true, action: 'cancel', invoice });
+  }, []);
+
+  const handleGenerateCreditNote = useCallback((invoice) => {
+    setConfirmDialog({ open: true, action: 'generateCreditNote', invoice });
+  }, []);
+
+  const handleViewPrintInvoice = useCallback((invoice) => {
+    setSelectedInvoice(invoice);
+    setDetailDialogOpen(true);
   }, []);
 
   const handleConfirmAction = useCallback(() => {
@@ -85,6 +80,12 @@ export default function InvoiceSearch() {
         cancelledBy: 'Current User',
       });
       enqueueSnackbar(`Invoice ${invoice.invoiceNo} has been cancelled`, { variant: 'success' });
+    } else if (action === 'generateCreditNote') {
+      storageService.update('invoices', invoice.id, {
+        creditNote: `CN-${invoice.invoiceNo}`,
+        creditNoteDate: new Date().toISOString().split('T')[0],
+      });
+      enqueueSnackbar(`Credit Note generated for Invoice ${invoice.invoiceNo}`, { variant: 'success' });
     }
     setConfirmDialog({ open: false, action: '', invoice: null });
     refresh();
@@ -92,9 +93,12 @@ export default function InvoiceSearch() {
 
   const columns = useMemo(
     () => [
-      { field: 'invoiceNo', headerName: 'Invoice No', width: 140 },
+      { field: 'invoiceNo', headerName: 'Invoice Number', width: 140 },
+      { field: 'invoiceDate', headerName: 'Invoice Date', width: 120 },
+      { field: 'dueDate', headerName: 'Due Date', width: 120 },
+      { field: 'appNumber', headerName: 'App Number', width: 130 },
       { field: 'studentName', headerName: 'Student Name', width: 180 },
-      { field: 'program', headerName: 'Program', width: 180 },
+      { field: 'invoiceTo', headerName: 'Invoice To', width: 160 },
       {
         field: 'amount',
         headerName: 'Amount',
@@ -102,47 +106,33 @@ export default function InvoiceSearch() {
         renderCell: (params) => `$${(params.value || 0).toFixed(2)}`,
       },
       {
-        field: 'paidAmount',
-        headerName: 'Paid',
-        width: 110,
+        field: 'taxAmount',
+        headerName: 'Tax Amount',
+        width: 120,
         renderCell: (params) => `$${(params.value || 0).toFixed(2)}`,
       },
       {
-        field: 'balance',
-        headerName: 'Balance',
-        width: 110,
-        renderCell: (params) => {
-          const balance = (params.row.amount || 0) - (params.row.paidAmount || 0);
-          return (
-            <Typography
-              sx={{
-                color: balance > 0 ? '#c62828' : '#2e7d32',
-                fontWeight: 600,
-                fontSize: '0.83rem',
-              }}
-            >
-              ${balance.toFixed(2)}
-            </Typography>
-          );
-        },
-      },
-      { field: 'dueDate', headerName: 'Due Date', width: 120 },
-      {
-        field: 'status',
-        headerName: 'Status',
+        field: 'totalAmount',
+        headerName: 'Total Amount',
         width: 130,
-        renderCell: (params) => <StatusChip status={params.value} />,
+        renderCell: (params) => `$${(params.value || 0).toFixed(2)}`,
       },
+      { field: 'creditNote', headerName: 'Credit Note', width: 130 },
       {
         field: 'actions',
-        headerName: 'Actions',
-        width: 160,
+        headerName: 'Action',
+        width: 200,
         sortable: false,
         renderCell: (params) => (
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Tooltip title="View Details">
-              <IconButton size="small" onClick={() => handleViewInvoice(params.row)}>
-                <VisibilityIcon fontSize="small" />
+            <Tooltip title="Generate Credit Note">
+              <IconButton size="small" color="primary" onClick={() => handleGenerateCreditNote(params.row)}>
+                <NoteAddIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="View/Print Invoice">
+              <IconButton size="small" onClick={() => handleViewPrintInvoice(params.row)}>
+                <PrintIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             {['Generated', 'Sent', 'Partially Paid', 'Overdue'].includes(params.row.status) && (
@@ -171,7 +161,7 @@ export default function InvoiceSearch() {
         ),
       },
     ],
-    [handleViewInvoice, handleMarkAsPaid, handleCancelInvoice]
+    [handleViewPrintInvoice, handleGenerateCreditNote, handleMarkAsPaid, handleCancelInvoice]
   );
 
   const detailFields = useMemo(

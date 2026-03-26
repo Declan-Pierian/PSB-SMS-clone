@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -13,7 +13,9 @@ import StatusChip from '../../components/common/StatusChip';
 import storageService from '../../services/storageService';
 import useSearch from '../../hooks/useSearch';
 import {
+  ENQUIRY_TYPES,
   EMPLOYEE_TYPES,
+  EMPLOYEE_TYPE_2,
   EMPLOYEE_DESIGNATIONS,
   EMPLOYEE_STATUSES,
 } from '../../data/constants';
@@ -38,15 +40,6 @@ const DEPARTMENTS = [
   'IT Support',
 ];
 
-const searchFields = [
-  { name: 'employeeId', label: 'Employee ID', type: 'text', gridSize: 3 },
-  { name: 'name', label: 'Name', type: 'text', gridSize: 3 },
-  { name: 'department', label: 'Department', type: 'select', options: DEPARTMENTS, gridSize: 3 },
-  { name: 'designation', label: 'Designation', type: 'select', options: EMPLOYEE_DESIGNATIONS, gridSize: 3 },
-  { name: 'type', label: 'Type', type: 'select', options: EMPLOYEE_TYPES, gridSize: 3 },
-  { name: 'status', label: 'Status', type: 'select', options: EMPLOYEE_STATUSES, gridSize: 3 },
-];
-
 const formFields = [
   { name: 'name', label: 'Full Name', type: 'text', required: true },
   { name: 'employeeId', label: 'Employee ID', type: 'text', required: true },
@@ -63,6 +56,30 @@ const formFields = [
 export default function EmployeeSearch() {
   const { enqueueSnackbar } = useSnackbar();
   const { data, handleSearch, handleReset, refresh } = useSearch(STORAGE_KEY);
+
+  const programs = useMemo(() => storageService.getAll('programs'), []);
+  const modules = useMemo(() => storageService.getAll('modules'), []);
+
+  const programOptions = useMemo(
+    () => programs.map((p) => ({ label: p.name || p.id, value: p.name || p.id })),
+    [programs]
+  );
+  const moduleOptions = useMemo(
+    () => modules.map((m) => ({ label: m.name || m.id, value: m.name || m.id })),
+    [modules]
+  );
+
+  const searchFields = useMemo(() => [
+    { name: 'name', label: 'Name', type: 'text', gridSize: 2 },
+    { name: 'userName', label: 'User Name', type: 'text', gridSize: 2 },
+    { name: 'enquiryType', label: 'Enquiry Type', type: 'select', options: ENQUIRY_TYPES, gridSize: 2 },
+    { name: 'program', label: 'Program', type: 'select', options: programOptions, gridSize: 3 },
+    { name: 'course', label: 'Course', type: 'select', options: moduleOptions, gridSize: 3 },
+    { name: 'type', label: 'Employee Type', type: 'select', options: EMPLOYEE_TYPES, gridSize: 2 },
+    { name: 'type2', label: 'Employee Type 2', type: 'select', options: EMPLOYEE_TYPE_2, gridSize: 2 },
+    { name: 'designation', label: 'Employee Designation', type: 'select', options: EMPLOYEE_DESIGNATIONS, gridSize: 2 },
+    { name: 'status', label: 'Employee Status', type: 'select', options: EMPLOYEE_STATUSES, gridSize: 2 },
+  ], [programOptions, moduleOptions]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);

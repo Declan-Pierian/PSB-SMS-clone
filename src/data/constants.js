@@ -38,6 +38,17 @@ export const COUNTRIES = [
   'Cambodia', 'Brunei', 'Kazakhstan', 'Nepal', 'Taiwan', 'Hong Kong',
 ];
 
+export const ENQUIRY_TYPES = ['SET', 'SBM', 'Certificate', 'Short Course', 'Partner Program'];
+export const ENQUIRY_MODES = ['Walk-in', 'Phone', 'Email', 'Website', 'Agent Referral', 'Social Media', 'Exhibition', 'Other'];
+export const STUDENT_INTEREST_LEVELS = ['High', 'Medium', 'Low', 'Not Interested'];
+export const SEARCH_TYPES = ['By ID', 'By Name', 'By Email', 'By Phone', 'By Agent', 'By Program'];
+export const SORT_BY_OPTIONS = ['Name A-Z', 'Name Z-A', 'Date Newest', 'Date Oldest', 'ID Ascending', 'ID Descending'];
+export const BATCH_TYPES = ['Regular', 'Weekend', 'Evening', 'Intensive', 'Online'];
+export const SEMESTER_TAGS = ['Semester 1', 'Semester 2', 'Semester 3', 'Trimester 1', 'Trimester 2', 'Trimester 3'];
+export const COURSE_TYPE_2 = ['Core', 'Elective', 'Foundation', 'Specialization', 'General Education'];
+export const S3_CACHE_STATUSES = ['Cached', 'Not Cached', 'Pending'];
+export const EMPLOYEE_TYPE_2 = ['Full-Time', 'Part-Time', 'Contract', 'Adjunct', 'Visiting'];
+
 export const RESOURCE_TYPES = ['PDF', 'Video', 'Audio', 'Document', 'Presentation', 'Link', 'Image'];
 export const FEEDBACK_TYPES = ['Course Feedback', 'Instructor Feedback', 'Facility Feedback', 'General Feedback'];
 export const QUESTION_TYPES = ['Multiple Choice', 'Rating Scale', 'Text', 'Yes/No', 'Dropdown'];

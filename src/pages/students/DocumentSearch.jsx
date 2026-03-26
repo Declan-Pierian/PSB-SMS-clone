@@ -14,7 +14,7 @@ import StatusChip from '../../components/common/StatusChip';
 import useSearch from '../../hooks/useSearch';
 import storageService from '../../services/storageService';
 import { useSnackbar } from 'notistack';
-import { DOCUMENT_TYPES, DOCUMENT_STATUSES } from '../../data/constants';
+import { DOCUMENT_TYPES, DOCUMENT_STATUSES, COUNTRIES, ACADEMIC_YEARS, ENQUIRY_STAGES, SORT_BY_OPTIONS } from '../../data/constants';
 
 export default function DocumentSearch() {
   const { enqueueSnackbar } = useSnackbar();
@@ -27,9 +27,21 @@ export default function DocumentSearch() {
   const [isNew, setIsNew] = useState(false);
 
   const searchFields = [
-    { name: 'studentName', label: 'Student Name', gridSize: 3 },
-    { name: 'documentType', label: 'Document Type', type: 'select', options: DOCUMENT_TYPES, gridSize: 3 },
-    { name: 'status', label: 'Status', type: 'select', options: DOCUMENT_STATUSES, gridSize: 3 },
+    { name: 'targetFromDate', label: 'Target From Date', type: 'date', gridSize: 2 },
+    { name: 'targetToDate', label: 'Target To Date', type: 'date', gridSize: 2 },
+    { name: 'enquiryId', label: 'Enquiry ID', gridSize: 2 },
+    { name: 'studentName', label: 'Student Name', gridSize: 2 },
+    { name: 'mobile', label: 'Mobile', gridSize: 2 },
+    { name: 'agentName', label: 'Agent Name', gridSize: 2 },
+    { name: 'applicationFromDate', label: 'Application From Date', type: 'date', gridSize: 2 },
+    { name: 'applicationToDate', label: 'Application To Date', type: 'date', gridSize: 2 },
+    { name: 'country', label: 'Country', type: 'select', options: COUNTRIES, gridSize: 2 },
+    { name: 'program', label: 'Program', type: 'select', options: [], gridSize: 3 },
+    { name: 'year', label: 'Year', type: 'select', options: ACADEMIC_YEARS, gridSize: 2 },
+    { name: 'documentType', label: 'Document Type', type: 'select', options: DOCUMENT_TYPES, gridSize: 2 },
+    { name: 'currentStage', label: 'Current Stage', type: 'select', options: ENQUIRY_STAGES, gridSize: 2 },
+    { name: 'sortBy', label: 'Sort By', type: 'select', options: SORT_BY_OPTIONS, gridSize: 2 },
+    { name: 'status', label: 'Status', type: 'select', options: DOCUMENT_STATUSES, gridSize: 2 },
   ];
 
   const columns = [

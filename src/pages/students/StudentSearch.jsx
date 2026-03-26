@@ -13,7 +13,7 @@ import StatusChip from '../../components/common/StatusChip';
 import useSearch from '../../hooks/useSearch';
 import storageService from '../../services/storageService';
 import { useSnackbar } from 'notistack';
-import { STUDENT_STATUSES, COUNTRIES } from '../../data/constants';
+import { STUDENT_STATUSES, COUNTRIES, ENQUIRY_STAGES, ENQUIRY_MODES, STUDENT_INTEREST_LEVELS, SORT_BY_OPTIONS, BATCH_STATUSES, ACADEMIC_YEARS, SEARCH_TYPES } from '../../data/constants';
 
 export default function StudentSearch() {
   const { enqueueSnackbar } = useSnackbar();
@@ -36,36 +36,52 @@ export default function StudentSearch() {
   }));
 
   const searchFields = [
-    { name: 'studentId', label: 'Student ID', gridSize: 2 },
+    { name: 'enquiryId', label: 'Enquiry ID / Name / Email', gridSize: 3 },
+    { name: 'studentCode', label: 'Student Code', gridSize: 2 },
+    { name: 'batch', label: 'Batch', gridSize: 2 },
+    { name: 'agent', label: 'Agent', gridSize: 2 },
+    { name: 'openId', label: 'Open ID', gridSize: 2 },
+    { name: 'companyName', label: 'Company Name', gridSize: 2 },
+    { name: 'fromEnquiryId', label: 'From Enquiry ID', gridSize: 2 },
+    { name: 'toEnquiryId', label: 'To Enquiry ID', gridSize: 2 },
     { name: 'name', label: 'Name', gridSize: 2 },
-    { name: 'email', label: 'Email', gridSize: 2 },
-    { name: 'program', label: 'Program', type: 'select', options: programOptions, gridSize: 2 },
-    { name: 'status', label: 'Status', type: 'select', options: STUDENT_STATUSES, gridSize: 2 },
-    { name: 'nationality', label: 'Nationality', type: 'select', options: COUNTRIES, gridSize: 2 },
+    { name: 'enquiryFormNumber', label: 'Enquiry Form Number', gridSize: 2 },
+    { name: 'year', label: 'Year', type: 'select', options: ACADEMIC_YEARS, gridSize: 2 },
+    { name: 'program', label: 'Program', type: 'select', options: programOptions, gridSize: 3 },
+    { name: 'searchType', label: 'Search Types', type: 'select', options: SEARCH_TYPES, gridSize: 2 },
+    { name: 'batchStatus', label: 'Batch Status', type: 'select', options: BATCH_STATUSES, gridSize: 2 },
+    { name: 'state', label: 'State', type: 'select', options: STUDENT_STATUSES, gridSize: 2 },
+    { name: 'enquiryMode', label: 'Enquiry Mode', type: 'select', options: ENQUIRY_MODES, gridSize: 2 },
+    { name: 'interestLevel', label: 'Student Interest Level', type: 'select', options: STUDENT_INTEREST_LEVELS, gridSize: 2 },
+    { name: 'sortBy', label: 'Sort By', type: 'select', options: SORT_BY_OPTIONS, gridSize: 2 },
+    { name: 'startStage', label: 'Start Stage', type: 'select', options: ENQUIRY_STAGES, gridSize: 2 },
   ];
 
   const columns = [
-    { field: 'studentId', headerName: 'Student ID', width: 120 },
-    { field: 'name', headerName: 'Name', width: 180, flex: 1 },
-    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'studentId', headerName: 'Enquiry ID', width: 110 },
+    { field: 'name', headerName: 'Student Name', width: 180, flex: 1 },
+    { field: 'email', headerName: 'Email', width: 190 },
     { field: 'phone', headerName: 'Phone', width: 130 },
     { field: 'program', headerName: 'Program', width: 180 },
-    { field: 'intake', headerName: 'Intake', width: 120 },
+    { field: 'intake', headerName: 'Intake', width: 110 },
+    { field: 'batch', headerName: 'Batch', width: 120 },
+    { field: 'nationality', headerName: 'Nationality', width: 110 },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: 'Stage',
       width: 120,
       renderCell: (params) => <StatusChip status={params.value} />,
     },
+    { field: 'enquiryMode', headerName: 'Source', width: 100 },
     { field: 'enrollmentDate', headerName: 'Enrollment Date', width: 130 },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 140,
+      width: 180,
       sortable: false,
       renderCell: (params) => (
         <Box>
-          <Tooltip title="View">
+          <Tooltip title="View Student">
             <IconButton size="small" onClick={() => handleView(params.row)} color="info">
               <VisibilityIcon fontSize="small" />
             </IconButton>

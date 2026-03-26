@@ -14,7 +14,16 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import StatusChip from '../../components/common/StatusChip';
 import storageService from '../../services/storageService';
 import useSearch from '../../hooks/useSearch';
-import { TEST_CATEGORIES, TEST_TYPES, PUBLISH_STATUSES } from '../../data/constants';
+import {
+  ENQUIRY_TYPES,
+  TERMS,
+  ACADEMIC_YEARS,
+  TEST_CATEGORIES,
+  TEST_TYPES,
+  PUBLISH_STATUSES,
+  S3_CACHE_STATUSES,
+  COURSE_TYPE_2,
+} from '../../data/constants';
 
 const STORAGE_KEY = 'tests';
 
@@ -25,6 +34,13 @@ export default function TestSearch() {
   const [editItem, setEditItem] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  const programs = useMemo(() => {
+    const progs = storageService.getAll('programs');
+    return progs.length > 0
+      ? progs.map((p) => p.name || p.programName || p.title)
+      : ['Bachelor of Science', 'Master of Business', 'Diploma in IT', 'Certificate in Management'];
+  }, []);
+
   const modules = useMemo(() => {
     const mods = storageService.getAll('modules');
     return mods.length > 0
@@ -33,11 +49,21 @@ export default function TestSearch() {
   }, []);
 
   const searchFields = useMemo(() => [
-    { name: 'name', label: 'Test Name' },
-    { name: 'module', label: 'Module', type: 'select', options: modules },
-    { name: 'category', label: 'Category', type: 'select', options: TEST_CATEGORIES },
-    { name: 'type', label: 'Type', type: 'select', options: TEST_TYPES },
-  ], [modules]);
+    { name: 'testId', label: 'Test ID', gridSize: 3 },
+    { name: 'name', label: 'Test Name', gridSize: 3 },
+    { name: 'enquiryType', label: 'Enquiry Type', type: 'select', options: ENQUIRY_TYPES, gridSize: 3 },
+    { name: 'program', label: 'Program', type: 'select', options: programs, gridSize: 3 },
+    { name: 'term', label: 'Term', type: 'select', options: TERMS, gridSize: 3 },
+    { name: 'courseName', label: 'Course Name', type: 'select', options: modules, gridSize: 3 },
+    { name: 'academicYear', label: 'Academic Year', type: 'select', options: ACADEMIC_YEARS, gridSize: 3 },
+    { name: 'category', label: 'Test Category', type: 'select', options: TEST_CATEGORIES, gridSize: 3 },
+    { name: 'type', label: 'Test Type', type: 'select', options: TEST_TYPES, gridSize: 3 },
+    { name: 'status', label: 'Publish Status', type: 'select', options: PUBLISH_STATUSES, gridSize: 3 },
+    { name: 'cachedOnS3', label: 'Cached on S3', type: 'select', options: S3_CACHE_STATUSES, gridSize: 3 },
+    { name: 'courseType2', label: 'Course Type 2', type: 'select', options: COURSE_TYPE_2, gridSize: 3 },
+    { name: 'fromDate', label: 'From Date', type: 'date', gridSize: 3 },
+    { name: 'toDate', label: 'To Date', type: 'date', gridSize: 3 },
+  ], [programs, modules]);
 
   const formFields = useMemo(() => [
     { name: 'name', label: 'Test Name', required: true },

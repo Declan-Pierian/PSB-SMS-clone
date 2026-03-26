@@ -23,15 +23,16 @@ const breadcrumbs = [
 ];
 
 const searchFields = [
-  { name: 'name', label: 'Agent Name', type: 'text', gridSize: 3 },
-  { name: 'company', label: 'Company', type: 'text', gridSize: 3 },
-  {
-    name: 'status',
-    label: 'Status',
-    type: 'select',
-    options: AGENT_STATUSES,
-    gridSize: 3,
-  },
+  { name: 'company', label: 'Company Name', type: 'text', gridSize: 3 },
+  { name: 'contactName', label: 'Contact Name', type: 'text', gridSize: 3 },
+  { name: 'mobile', label: 'Mobile No', type: 'text', gridSize: 3 },
+  { name: 'email', label: 'Email', type: 'text', gridSize: 3 },
+  { name: 'alternateEmail', label: 'Alternate Email', type: 'text', gridSize: 3 },
+  { name: 'address', label: 'Address', type: 'text', gridSize: 3 },
+  { name: 'city', label: 'City', type: 'text', gridSize: 2 },
+  { name: 'state', label: 'State', type: 'text', gridSize: 2 },
+  { name: 'addressCountry', label: 'Address Country', type: 'text', gridSize: 2 },
+  { name: 'postalCode', label: 'Postal Code', type: 'text', gridSize: 2 },
 ];
 
 const formFields = [
@@ -126,19 +127,11 @@ export default function AgentSearch() {
   }, [deleteItem, enqueueSnackbar, refresh]);
 
   const columns = [
-    { field: 'agentId', headerName: 'Agent ID', flex: 0.8, minWidth: 100 },
+    { field: 'agentId', headerName: 'ID', flex: 0.6, minWidth: 80 },
     { field: 'name', headerName: 'Name', flex: 1.2, minWidth: 150 },
     { field: 'company', headerName: 'Company', flex: 1.2, minWidth: 150 },
+    { field: 'addressCountry', headerName: 'Country', flex: 0.8, minWidth: 110 },
     { field: 'email', headerName: 'Email', flex: 1.2, minWidth: 180 },
-    { field: 'phone', headerName: 'Phone', flex: 0.9, minWidth: 120 },
-    { field: 'region', headerName: 'Region', flex: 0.8, minWidth: 110 },
-    {
-      field: 'commission',
-      headerName: 'Commission %',
-      flex: 0.7,
-      minWidth: 100,
-      renderCell: (params) => `${params.value || 0}%`,
-    },
     {
       field: 'status',
       headerName: 'Status',
@@ -146,13 +139,7 @@ export default function AgentSearch() {
       minWidth: 120,
       renderCell: (params) => <StatusChip status={params.value} />,
     },
-    {
-      field: 'contractCount',
-      headerName: 'Contracts',
-      flex: 0.6,
-      minWidth: 90,
-      renderCell: (params) => params.value || 0,
-    },
+    { field: 'remarks', headerName: 'Remarks', flex: 1, minWidth: 150 },
     {
       field: 'actions',
       headerName: 'Actions',

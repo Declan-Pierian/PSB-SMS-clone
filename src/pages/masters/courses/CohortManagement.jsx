@@ -12,6 +12,7 @@ import ConfirmDialog from '../../../components/common/ConfirmDialog';
 import StatusChip from '../../../components/common/StatusChip';
 import storageService from '../../../services/storageService';
 import useSearch from '../../../hooks/useSearch';
+import { ENQUIRY_TYPES, BATCH_TYPES, ACADEMIC_YEARS } from '../../../data/constants';
 
 const STORAGE_KEY = 'cohorts';
 
@@ -42,28 +43,16 @@ export default function CohortManagement() {
     [intakes]
   );
 
+  const batchTagOptions = ['Tag A', 'Tag B', 'Tag C', 'Tag D'];
+
   const searchFields = [
-    {
-      name: 'program',
-      label: 'Program',
-      type: 'select',
-      options: programOptions,
-      gridSize: 3,
-    },
-    {
-      name: 'intake',
-      label: 'Intake',
-      type: 'select',
-      options: intakeOptions,
-      gridSize: 3,
-    },
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      options: ['Active', 'Completed', 'Upcoming', 'Cancelled'],
-      gridSize: 2,
-    },
+    { name: 'name', label: 'Batch Name', type: 'text', gridSize: 3 },
+    { name: 'code', label: 'Batch Code', type: 'text', gridSize: 2 },
+    { name: 'batchType', label: 'Batch Type', type: 'select', options: BATCH_TYPES, gridSize: 2 },
+    { name: 'enquiryType', label: 'Enquiry Type', type: 'select', options: ENQUIRY_TYPES, gridSize: 2 },
+    { name: 'program', label: 'Program', type: 'select', options: programOptions, gridSize: 3 },
+    { name: 'academicYear', label: 'Academic Year', type: 'select', options: ACADEMIC_YEARS, gridSize: 2 },
+    { name: 'batchTag', label: 'Batch Tag', type: 'select', options: batchTagOptions, gridSize: 2 },
   ];
 
   const formFields = [
