@@ -1,11 +1,7 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { DEMO_USERS, ROLES, ROLE_LABELS, hasModuleAccess, hasPathAccess, filterMenuByRole, hasAnyRole, isInRoleGroup } from '../data/roles';
 
 const AuthContext = createContext(null);
-
-const VALID_USERS = [
-  { username: 'manoj', password: 'Manoj@PierianSms1', name: 'Manoj', role: 'Admin' },
-  { username: 'admin', password: 'admin123', name: 'Administrator', role: 'Admin' },
-];
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -14,11 +10,16 @@ export function AuthProvider({ children }) {
   });
 
   const login = useCallback((username, password) => {
-    const found = VALID_USERS.find(
+    const found = DEMO_USERS.find(
       (u) => u.username.toLowerCase() === username.toLowerCase() && u.password === password
     );
     if (found) {
-      const userData = { username: found.username, name: found.name, role: found.role };
+      const userData = {
+        username: found.username,
+        name: found.name,
+        role: found.role,
+        roleLabel: ROLE_LABELS[found.role] || found.role,
+      };
       setUser(userData);
       localStorage.setItem('sms_user', JSON.stringify(userData));
       return { success: true };
@@ -31,8 +32,28 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('sms_user');
   }, []);
 
+  const permissions = useMemo(() => {
+    if (!user) return {};
+    const role = user.role;
+    return {
+      role,
+      roleLabel: user.roleLabel || ROLE_LABELS[role] || role,
+      isRoot: role === ROLES.ROOT,
+      isStudent: role === ROLES.STUDENT,
+      isSales: isInRoleGroup(role, 'Sales'),
+      isAdmission: isInRoleGroup(role, 'Admission'),
+      isAdmin: isInRoleGroup(role, 'Admin'),
+      isExam: role === ROLES.EXAM,
+      isFinance: role === ROLES.FINANCE,
+      canAccessModule: (moduleId) => hasModuleAccess(role, moduleId),
+      canAccessPath: (path) => hasPathAccess(role, path),
+      hasAnyRole: (roles) => hasAnyRole(role, roles),
+      filterMenu: (menuItems) => filterMenuByRole(menuItems, role),
+    };
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, permissions }}>
       {children}
     </AuthContext.Provider>
   );

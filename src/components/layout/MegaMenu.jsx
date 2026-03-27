@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Box, Button, Paper, Popover, Typography, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Link as RouterLink } from 'react-router-dom';
@@ -17,6 +17,7 @@ import EventIcon from '@mui/icons-material/Event';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import HomeIcon from '@mui/icons-material/Home';
 import menuConfig from '../../data/menuConfig';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Map icon string names to actual MUI icon components
 const iconMap = {
@@ -197,6 +198,13 @@ const MegaMenu = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const closeTimeoutRef = useRef(null);
+  const { permissions } = useAuth();
+
+  // Filter menu based on user role
+  const filteredMenu = useMemo(() => {
+    if (!permissions || !permissions.filterMenu) return menuConfig;
+    return permissions.filterMenu(menuConfig);
+  }, [permissions]);
 
   const handleMenuOpen = (event, index) => {
     if (closeTimeoutRef.current) {
@@ -232,7 +240,7 @@ const MegaMenu = () => {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-      {menuConfig.map((menuItem, index) => (
+      {filteredMenu.map((menuItem, index) => (
         <Box
           key={index}
           onMouseEnter={(e) => handleButtonMouseEnter(e, index)}

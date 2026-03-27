@@ -28,7 +28,7 @@ const UserMenu = () => {
 
   const user = auth?.user || { name: 'Admin User', role: 'Administrator' };
   const userName = user.name || 'User';
-  const userRole = user.role || 'Staff';
+  const userRole = user.roleLabel || user.role || 'Staff';
 
   // Get initials for avatar
   const getInitials = (name) => {
