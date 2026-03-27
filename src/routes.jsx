@@ -22,6 +22,7 @@ const CenterIngestion = lazy(() => import('./pages/masters/partners/CenterIngest
 const Centres = lazy(() => import('./pages/masters/partners/Centres'));
 
 // Masters - Courses
+const CourseIngestion = lazy(() => import('./pages/masters/courses/CourseIngestion'));
 const CourseManagement = lazy(() => import('./pages/masters/courses/CourseManagement'));
 const ModuleManagement = lazy(() => import('./pages/masters/courses/ModuleManagement'));
 const CohortManagement = lazy(() => import('./pages/masters/courses/CohortManagement'));
@@ -34,6 +35,7 @@ const ProductManagement = lazy(() => import('./pages/masters/courses/ProductMana
 const SectionManagement = lazy(() => import('./pages/masters/courses/SectionManagement'));
 const SectionIngestor = lazy(() => import('./pages/masters/courses/SectionIngestor'));
 const CurrentTerms = lazy(() => import('./pages/masters/courses/CurrentTerms'));
+const ModuleIngestion = lazy(() => import('./pages/masters/courses/ModuleIngestion'));
 
 // Masters - Payments
 const InstallmentTemplate = lazy(() => import('./pages/masters/payments/InstallmentTemplate'));
@@ -47,12 +49,23 @@ const FeeHeadRule = lazy(() => import('./pages/masters/payments/FeeHeadRule'));
 // Masters - Others
 const CountrySearch = lazy(() => import('./pages/masters/others/CountrySearch'));
 
-// HR
+// HR / Employee Management
 const EmployeeSearch = lazy(() => import('./pages/hr/EmployeeSearch'));
 const EmployeeIngestor = lazy(() => import('./pages/hr/EmployeeIngestor'));
 const HolidayList = lazy(() => import('./pages/hr/HolidayList'));
 const EmployeeBulkOperation = lazy(() => import('./pages/hr/EmployeeBulkOperation'));
 const LeaveDashboard = lazy(() => import('./pages/hr/LeaveDashboard'));
+const BusinessUnit = lazy(() => import('./pages/hr/BusinessUnit'));
+const BudgetManagement = lazy(() => import('./pages/hr/BudgetManagement'));
+const DepartmentManagement = lazy(() => import('./pages/hr/DepartmentManagement'));
+const ProjectManagement = lazy(() => import('./pages/hr/ProjectManagement'));
+const BulkPayslips = lazy(() => import('./pages/hr/BulkPayslips'));
+const CTCTemplate = lazy(() => import('./pages/hr/CTCTemplate'));
+const LeaveStatus = lazy(() => import('./pages/hr/LeaveStatus'));
+const PaymentHeads = lazy(() => import('./pages/hr/PaymentHeads'));
+const WorkingDays = lazy(() => import('./pages/hr/WorkingDays'));
+const EmployeeTraining = lazy(() => import('./pages/hr/EmployeeTraining'));
+const LeaveManagement = lazy(() => import('./pages/hr/LeaveManagement'));
 
 // Finance
 const PaymentConsole = lazy(() => import('./pages/finance/PaymentConsole'));
@@ -68,6 +81,7 @@ const DailyCollections = lazy(() => import('./pages/finance/DailyCollections'));
 const DefaultersReport = lazy(() => import('./pages/finance/DefaultersReport'));
 const PaymentIngestion = lazy(() => import('./pages/finance/PaymentIngestion'));
 const PaymentVsInstallment = lazy(() => import('./pages/finance/PaymentVsInstallment'));
+const HeadReport = lazy(() => import('./pages/finance/HeadReport'));
 
 // Student - Registration
 const OnlineApplication = lazy(() => import('./pages/students/OnlineApplication'));
@@ -168,6 +182,11 @@ const ExamAttendance = lazy(() => import('./pages/academics/ExamAttendance'));
 const StudentLeaveManagement = lazy(() => import('./pages/academics/StudentLeaveManagement'));
 const AbsenteesReport = lazy(() => import('./pages/academics/AbsenteesReport'));
 const AttendanceComparison = lazy(() => import('./pages/academics/AttendanceComparison'));
+const AbsenteesReportManual = lazy(() => import('./pages/academics/AbsenteesReportManual'));
+const BiometricStudentDashboard = lazy(() => import('./pages/academics/BiometricStudentDashboard'));
+const BiometricAbsentees = lazy(() => import('./pages/academics/BiometricAbsentees'));
+const BiometricStaffDashboard = lazy(() => import('./pages/academics/BiometricStaffDashboard'));
+const BiometricSyncAttendance = lazy(() => import('./pages/academics/BiometricSyncAttendance'));
 
 // Academics - Study Resource
 const FeedbackForm = lazy(() => import('./pages/academics/FeedbackForm'));
@@ -247,6 +266,7 @@ const routes = [
   { path: 'masters/centres', element: wrap(Centres) },
 
   // Masters - Courses
+  { path: 'masters/course-ingestion', element: wrap(CourseIngestion) },
   { path: 'masters/courses', element: wrap(CourseManagement) },
   { path: 'masters/modules', element: wrap(ModuleManagement) },
   { path: 'masters/cohorts', element: wrap(CohortManagement) },
@@ -259,6 +279,7 @@ const routes = [
   { path: 'masters/sections', element: wrap(SectionManagement) },
   { path: 'masters/section-ingestor', element: wrap(SectionIngestor) },
   { path: 'masters/current-terms', element: wrap(CurrentTerms) },
+  { path: 'masters/module-ingestion', element: wrap(ModuleIngestion) },
 
   // Masters - Payments
   { path: 'masters/installment-templates', element: wrap(InstallmentTemplate) },
@@ -272,12 +293,23 @@ const routes = [
   // Masters - Others
   { path: 'masters/countries', element: wrap(CountrySearch) },
 
-  // HR
+  // HR / Employee Management
   { path: 'hr/employees', element: wrap(EmployeeSearch) },
   { path: 'hr/employee-ingestor', element: wrap(EmployeeIngestor) },
   { path: 'hr/holidays', element: wrap(HolidayList) },
   { path: 'hr/bulk-operations', element: wrap(EmployeeBulkOperation) },
   { path: 'hr/leaves', element: wrap(LeaveDashboard) },
+  { path: 'hr/business-unit', element: wrap(BusinessUnit) },
+  { path: 'hr/budget-management', element: wrap(BudgetManagement) },
+  { path: 'hr/department-management', element: wrap(DepartmentManagement) },
+  { path: 'hr/project-management', element: wrap(ProjectManagement) },
+  { path: 'hr/bulk-payslips', element: wrap(BulkPayslips) },
+  { path: 'hr/ctc-template', element: wrap(CTCTemplate) },
+  { path: 'hr/leave-status', element: wrap(LeaveStatus) },
+  { path: 'hr/payment-heads', element: wrap(PaymentHeads) },
+  { path: 'hr/working-days', element: wrap(WorkingDays) },
+  { path: 'hr/employee-training', element: wrap(EmployeeTraining) },
+  { path: 'hr/leave-management', element: wrap(LeaveManagement) },
 
   // Finance
   { path: 'finance/payment-console', element: wrap(PaymentConsole) },
@@ -293,6 +325,7 @@ const routes = [
   { path: 'finance/defaulters', element: wrap(DefaultersReport) },
   { path: 'finance/payment-ingestion', element: wrap(PaymentIngestion) },
   { path: 'finance/payment-vs-installment', element: wrap(PaymentVsInstallment) },
+  { path: 'finance/head-report', element: wrap(HeadReport) },
 
   // Students - Registration
   { path: 'students/application', element: wrap(OnlineApplication) },
@@ -393,6 +426,11 @@ const routes = [
   { path: 'academics/student-leave', element: wrap(StudentLeaveManagement) },
   { path: 'academics/absentees', element: wrap(AbsenteesReport) },
   { path: 'academics/attendance-comparison', element: wrap(AttendanceComparison) },
+  { path: 'academics/absentees-manual', element: wrap(AbsenteesReportManual) },
+  { path: 'academics/biometric-student-dashboard', element: wrap(BiometricStudentDashboard) },
+  { path: 'academics/biometric-absentees', element: wrap(BiometricAbsentees) },
+  { path: 'academics/biometric-staff-dashboard', element: wrap(BiometricStaffDashboard) },
+  { path: 'academics/biometric-sync', element: wrap(BiometricSyncAttendance) },
 
   // Academics - Study Resource
   { path: 'academics/feedback-form', element: wrap(FeedbackForm) },
